@@ -293,14 +293,14 @@ export function parseDurationLikeString(
 const durationLikeStringRegex = /^(\d+)([a-zA-Z]+)$/;
 
 const shortDurationPeriodLookups = {
-  ms: 1,
-  s: 1000,
-  m: 60000,
-  h: 3600000,
-  d: 86400000,
-  w: 604800000,
-  M: 2628000000,
-  y: 31536000000,
+  ms: millisecond,
+  s: second,
+  m: minute,
+  h: hour,
+  d: day,
+  w: week,
+  M: month,
+  y: year,
 };
 
 export function parseShortDurationLikeStringToMilliseconds(
