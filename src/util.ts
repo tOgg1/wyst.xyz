@@ -148,6 +148,15 @@ const temporalPrepositions = new Set([
   "within",
 ]);
 
+const fullSpecAdverbials = {
+  "hourly": [1, hour],
+  "daily": [1, day],
+  "weekly": [1, week],
+  "monthly": [1, month],
+  "quarterly": [1, quarter],
+  "yearly": [1, year],
+}
+
 interface ParseDurationLikeStringConfig {
   outputUnit:
     | "milliseconds"
@@ -201,6 +210,13 @@ export function parseDurationLikeString(
   // If we have a single token, we try to parse it as a simple duration indicator,
   // like 1s, 1m etc.
   if (tokenized.length === 1) {
+
+    // If the string is a full-spec adverbial, we parse it as such.
+    if (fullSpecAdverbials.hasOwnProperty(durationLikeString)) {
+      const [multiplier, duration] = fullSpecAdverbials[durationLikeString as keyof typeof fullSpecAdverbials];
+      return convertToFinalUnit(multiplier * duration, overloadedConfig.outputUnit);
+    }
+
     const parsed =
       parseShortDurationLikeStringToMilliseconds(durationLikeString);
     if (parsed === null) {

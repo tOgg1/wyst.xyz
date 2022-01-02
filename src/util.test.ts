@@ -178,4 +178,13 @@ describe("parseDurationLikeString", () => {
     expect(parseDurationLikeString("5 hours")).toBe(oneHour * 5);
     expect(parseDurationLikeString("356 hours")).toBe(oneHour * 356);
   })
+
+  it("should handle full adverbial indicators such as monthly", () => {
+    expect(parseDurationLikeString("hourly")).toBe(oneHour);
+    expect(parseDurationLikeString("daily")).toBe(oneDay);
+    expect(parseDurationLikeString("weekly")).toBe(oneWeek);
+    expect(parseDurationLikeString("monthly")).toBe(oneMonth);
+    expect(parseDurationLikeString("quarterly")).toBe(3 * oneMonth);
+    expect(parseDurationLikeString("yearly")).toBe(oneYear);
+  })
 });
