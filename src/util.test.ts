@@ -8,7 +8,7 @@ const oneWeek = 604800000;
 const oneMonth = 2628000000;
 const oneYear = 31536000000;
 
-describe("parseDurationLikeStringToSeconds", () => {
+describe("parseDurationLikeString", () => {
   it("should handle simple every directives", () => {
     expect(parseDurationLikeString("every month")).toBe(oneMonth);
     expect(parseDurationLikeString("every week")).toBe(oneWeek);
