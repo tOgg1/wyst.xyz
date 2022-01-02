@@ -24,17 +24,32 @@ describe("parseDurationLikeStringToSeconds", () => {
   });
 
   it("should handle more complex every directives including arbitrary duration indicators", () => {
-    // expect(parseDurationLikeString("every quarter")).toBe(3 * oneMonth);
+    expect(parseDurationLikeString("every quarter")).toBe(3 * oneMonth);
     expect(parseDurationLikeString("every half hour")).toBe(30 * oneMinute);
     expect(parseDurationLikeString("every 90 minutes")).toBe(
       90 * oneMinute
     );
-    // expect(parseDurationLikeString("every day at 12:00")).toBe(oneDay);
-    // expect(parseDurationLikeString("every wednesday")).toBe(oneWeek);
-    // expect(parseDurationLikeString("every january")).toBe(oneMonth);
-    // expect(parseDurationLikeString("every second month")).toBe(2 * oneMonth);
-    // expect(parseDurationLikeString("every second week")).toBe(2 * oneWeek);
+    expect(parseDurationLikeString("every wednesday")).toBe(oneWeek);
+    expect(parseDurationLikeString("every january")).toBe(oneYear);
+    expect(parseDurationLikeString("every second month")).toBe(2 * oneMonth);
+    expect(parseDurationLikeString("every second week")).toBe(2 * oneWeek);
+
+    expect(parseDurationLikeString("every third second")).toBe(3 * oneSecond);
   });
+
+  it("should properly ignore temporal prepositions", () => {
+    expect(parseDurationLikeString("every second of the day")).toBe(oneSecond)
+    expect(parseDurationLikeString("every second of the month")).toBe(oneSecond)
+    expect(parseDurationLikeString("every third second of the month")).toBe(3 * oneSecond)
+
+    expect(parseDurationLikeString("every day at 12")).toBe(oneDay);
+    expect(parseDurationLikeString("every Monday")).toBe(oneWeek);
+    expect(parseDurationLikeString("the first day every month")).toBe(oneMonth);
+    expect(parseDurationLikeString("every quarter of the year")).toBe(3 * oneMonth);
+
+    expect(parseDurationLikeString("every second of the day at 12")).toBe(oneSecond)
+    expect(parseDurationLikeString("every January")).toBe(oneYear);
+  })
 
   it("should handle once, twice and thrice directives", () => {
     expect(parseDurationLikeString("once a month")).toBeCloseTo(oneMonth);

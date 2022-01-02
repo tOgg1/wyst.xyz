@@ -69,26 +69,84 @@ const directCardinalLookup = {
   hundred: 100,
 };
 
+const millisecond = 1;
+const second = 1000;
+const minute = 60000;
+const hour = 3600000;
+const day = 86400000;
+const week = 604800000;
+const month = 2628000000;
+const quarter = 3 * month;
+const year = 31536000000;
+
 export const periodLookup = {
-  millisecond: 1,
-  milliseconds: 1,
-  second: 1000,
-  seconds: 1000,
-  minute: 60000,
-  minutes: 60000,
-  hour: 3600000,
-  hours: 3600000,
-  day: 86400000,
-  days: 86400000,
-  week: 604800000,
-  weeks: 604800000,
-  month: 2628000000,
-  months: 2628000000,
-  quarter: 7884000000,
-  quarters: 7884000000,
-  year: 31536000000,
-  years: 31536000000,
+  millisecond: millisecond,
+  milliseconds: millisecond,
+  second: second,
+  seconds: second,
+  minute: minute,
+  minutes: minute,
+  hour: hour,
+  hours: hour,
+  day: day,
+  days: day,
+  week: week,
+  weeks: week,
+  month: month,
+  months: month,
+  quarter: quarter,
+  quarters: quarter,
+  year: year,
+  years: year,
+
+  // Weekday aliases.
+  monday: week,
+  tuesday: week,
+  wednesday: week,
+  thursday: week,
+  friday: week,
+  saturday: week,
+  sunday: week,
+
+  // Month aliases
+  january: year,
+  february: year,
+  march: year,
+  april: year,
+  may: year,
+  june: year,
+  july: year,
+  august: year,
+  september: year,
+  october: year,
+  november: year,
+  december: year,
+
+  // Quarter aliases
+  q1: year,
+  q2: year,
+  q3: year,
+  q4: year,
 };
+
+const temporalPrepositions = new Set([
+  "after",
+  "afterwards",
+  "at",
+  "before",
+  "by",
+  "during",
+  "from",
+  "in",
+  "into",
+  "on",
+  "of",
+  "since",
+  "through",
+  "to",
+  "until",
+  "within",
+]);
 
 interface ParseDurationLikeStringConfig {
   outputUnit:
@@ -110,19 +168,19 @@ function convertToFinalUnit(
     case "milliseconds":
       return duration;
     case "seconds":
-      return duration / 1000;
+      return duration / second;
     case "minutes":
-      return duration / 60000;
+      return duration / minute;
     case "hours":
-      return duration / 3600000;
+      return duration / hour;
     case "days":
-      return duration / 86400000;
+      return duration / day;
     case "weeks":
-      return duration / 604800000;
+      return duration / week;
     case "months":
-      return duration / 2628000000;
+      return duration / month;
     case "years":
-      return duration / 31536000000;
+      return duration / year;
   }
 }
 
@@ -160,13 +218,47 @@ export function parseDurationLikeString(
   let inverseFrequencyIndicated = false;
 
   for (let i = 0; i < tokenized.length; i++) {
-    const token = tokenized[i];
+    const token = tokenized[i].toLowerCase();
 
     if (token === "times" || token === "time") {
       inverseFrequencyIndicated = true;
     }
 
-    if (numberRegex.test(token)) {
+    // This is typical for phrases like "every day at 12" or "every week on Monday".
+    //
+    // If we find a temporal preposition and we already have indicators, we bail out
+    // as there may be indicators after the temporal preposition that we should ignore.
+    if (
+      temporalPrepositions.has(token) &&
+      frequencyIndicated &&
+      periodIndicated
+    ) {
+      break;
+    }
+
+    // Handle the "second"-case especially, as it is both an ordinal and a period.
+    if (token === "second") {
+
+      // If the period is after a temporal preposition, we ignore it.
+      const nextTemporalPrepositionIndex = tokenized.findIndex((t) =>
+        temporalPrepositions.has(t)
+      );
+
+      const hasAFollowingPeriodIndicator = tokenized
+        .slice(
+          i + 1,
+          nextTemporalPrepositionIndex === -1
+            ? undefined
+            : nextTemporalPrepositionIndex
+        )
+        .some((x) => x in periodLookup);
+
+      if (!hasAFollowingPeriodIndicator) {
+        periodIndicated = 1000;
+      } else {
+        frequencyIndicated = directOrdinalLookup["second"];
+      }
+    } else if (numberRegex.test(token)) {
       const number = parseInt(token, 10);
 
       frequencyIndicated = number;
@@ -177,19 +269,8 @@ export function parseDurationLikeString(
       frequencyIndicated =
         directCardinalLookup[token as keyof typeof directCardinalLookup];
     } else if (token in directOrdinalLookup) {
-      // Handle the "second" ordinal specially, as it may be both an ordinal
-      // but also a period indicator
-      const hasAFollowingPeriodIndicator = tokenized
-        .slice(i + 1)
-        .some((x) => x in periodLookup);
-
-      if (!hasAFollowingPeriodIndicator) {
-        // Handle as a period
-        periodIndicated = 1000;
-      } else {
-        frequencyIndicated =
-          directOrdinalLookup[token as keyof typeof directOrdinalLookup];
-      }
+      frequencyIndicated =
+        directOrdinalLookup[token as keyof typeof directOrdinalLookup];
     } else if (token in periodLookup) {
       periodIndicated = periodLookup[token as keyof typeof periodLookup];
     }
