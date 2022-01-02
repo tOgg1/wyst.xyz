@@ -8,7 +8,7 @@ const oneWeek = 604800000;
 const oneMonth = 2628000000;
 const oneYear = 31536000000;
 
-describe("parseDurationLikeStringToSeconds", () => {
+describe("parseDurationLikeString", () => {
   it("should handle simple every directives", () => {
     expect(parseDurationLikeString("every month")).toBe(oneMonth);
     expect(parseDurationLikeString("every week")).toBe(oneWeek);
@@ -177,5 +177,14 @@ describe("parseDurationLikeStringToSeconds", () => {
     expect(parseDurationLikeString("4 hours")).toBe(oneHour * 4);
     expect(parseDurationLikeString("5 hours")).toBe(oneHour * 5);
     expect(parseDurationLikeString("356 hours")).toBe(oneHour * 356);
+  })
+
+  it("should handle full adverbial indicators such as monthly", () => {
+    expect(parseDurationLikeString("hourly")).toBe(oneHour);
+    expect(parseDurationLikeString("daily")).toBe(oneDay);
+    expect(parseDurationLikeString("weekly")).toBe(oneWeek);
+    expect(parseDurationLikeString("monthly")).toBe(oneMonth);
+    expect(parseDurationLikeString("quarterly")).toBe(3 * oneMonth);
+    expect(parseDurationLikeString("yearly")).toBe(oneYear);
   })
 });
