@@ -262,7 +262,7 @@ function App() {
             type="submit"
             className="rounded bg-indigo-600 text-white h-12"
           >
-            What's the verdict?
+           Is it time to automate?
           </button>
         </form>
       </section>
