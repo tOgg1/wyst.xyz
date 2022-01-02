@@ -140,6 +140,8 @@ export function parseDurationLikeString(
 
   const tokenized = durationLikeString.split(" ");
 
+  // If we have a single token, we try to parse it as a simple duration indicator,
+  // like 1s, 1m etc.
   if (tokenized.length === 1) {
     const parsed =
       parseShortDurationLikeStringToMilliseconds(durationLikeString);
@@ -150,35 +152,24 @@ export function parseDurationLikeString(
     return convertToFinalUnit(parsed, overloadedConfig.outputUnit);
   }
 
-  // Iterate through the tokens and see if we can find a quantifier, a
-  // cardinal, or an ordinal.
+  let frequencyIndicated = null;
+  let periodIndicated = null;
 
-  let frequencyIndicated = null; // Default is "each" or "every"
-  let periodIndicated = null; // Default is "second"
-
+  // This is true if the sentence is of the form "twice a month", "two times a month",
+  // instead of, say, "every two months".
   let inverseFrequencyIndicated = false;
 
   for (let i = 0; i < tokenized.length; i++) {
     const token = tokenized[i];
 
-    if (token === "times") {
+    if (token === "times" || token === "time") {
       inverseFrequencyIndicated = true;
     }
 
     if (numberRegex.test(token)) {
       const number = parseInt(token, 10);
 
-      // Find the period indicated
-      const period = tokenized
-        .slice(i + 1)
-        .find((t) => periodLookup[t as keyof typeof periodLookup]);
-
-      if (period === undefined) {
-        continue;
-      }
-
       frequencyIndicated = number;
-      periodIndicated = periodLookup[period as keyof typeof periodLookup];
     } else if (token in quantifierLookup) {
       frequencyIndicated =
         quantifierLookup[token as keyof typeof quantifierLookup];

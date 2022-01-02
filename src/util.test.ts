@@ -126,6 +126,9 @@ describe("parseDurationLikeStringToSeconds", () => {
   it("should handle cardinal numbers", () => {
     expect(parseDurationLikeString("every one months")).toBe(oneMonth);
     expect(parseDurationLikeString("every two months")).toBe(oneMonth * 2);
+
+    expect(parseDurationLikeString("two times a month")).toBeCloseTo(oneMonth / 2);
+    expect(parseDurationLikeString("ten times a month")).toBeCloseTo(oneMonth / 10);
   })
 
   it('should handle simple durations with numbers', () => {
